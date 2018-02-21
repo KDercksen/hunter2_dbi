@@ -22,7 +22,9 @@ inside where you cloned this repository.
 ### System requirements
 - [Python >3.6](https://www.python.org/downloads/release/python-364/)
 - keras (will install numpy and scipy as well)
-- sklearn
+- sklearn (machine learning package)
+- matplotlib (visualization)
+- tensorflow-gpu (keras backend; you can also use regular tensorflow)
 
 #### Virtual environment
 Ideally you work in a Python virtual environment. If you don't know how to set
@@ -38,7 +40,6 @@ Activate virtual environment:
     $ source <PATH>/bin/activate
 
 Once activated, anything you install using `pip` is installed in the virtual
-environment separately from your system Python. Keras and sklearn can be
-installed using `pip`:
+environment separately from your system Python:
 
-    $ pip install keras sklearn
+    $ pip install keras sklearn matplotlib tensorflow-gpu
