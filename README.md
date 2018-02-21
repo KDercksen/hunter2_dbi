@@ -25,6 +25,7 @@ inside where you cloned this repository.
 - sklearn (machine learning package)
 - matplotlib (visualization)
 - tensorflow-gpu (keras backend; you can also use regular tensorflow)
+- pandas (easy data inspection)
 
 #### Virtual environment
 Ideally you work in a Python virtual environment. If you don't know how to set
@@ -42,4 +43,4 @@ Activate virtual environment:
 Once activated, anything you install using `pip` is installed in the virtual
 environment separately from your system Python:
 
-    $ pip install keras sklearn matplotlib tensorflow-gpu
+    $ pip install keras sklearn matplotlib tensorflow-gpu pandas
