@@ -10,9 +10,10 @@ create a classification system to correctly classify breeds of dogs.
 ### Data
 [Download here](https://www.kaggle.com/c/dog-breed-identification/data). Make
 sure you download and extract the data in a folder called `data` (this folder
-is in `.gitignore` so the data does not have to reside on the repository).
+is in `.gitignore` so the data does not have to reside on the repository)
+inside where you cloned this repository.
 
-    data
+    this/repository/data
     ├── labels.csv
     ├── sample_submission.csv
     ├── test
