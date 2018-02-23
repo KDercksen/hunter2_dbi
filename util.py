@@ -18,7 +18,8 @@ def read_img(img_id, train_or_test, size):
     train_or_test: string
         'train' or 'test'.
     size: int
-        Size of image (size x size), for example 224 for VGG16 network or 299 for XCeption network.
+        Size of image (size x size), for example 224 for VGG16 network or 299
+        for XCeption network.
 
     Returns:
     --------
@@ -53,7 +54,8 @@ def get_images(train_or_test, size):
     train_or_test: string
         'train' or 'test'.
     size: int
-        Size of image (size x size), for example 224 for VGG16 network or 299 for XCeption network.
+        Size of image (size x size), for example 224 for VGG16 network or 299
+        for XCeption network.
     '''
     for img in os.listdir(osp.join(DATA_DIR, train_or_test)):
         img_id = osp.splitext(osp.basename(img))[0]
