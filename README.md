@@ -44,3 +44,8 @@ Once activated, anything you install using `pip` is installed in the virtual
 environment separately from your system Python:
 
     $ pip install keras sklearn matplotlib tensorflow-gpu pandas
+
+### Code formatting
+Code should be formatted according to
+[PEP8](https://www.python.org/dev/peps/pep-0008/) guidelines. 4 spaces
+indentation etc. :)
