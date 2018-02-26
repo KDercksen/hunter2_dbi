@@ -26,6 +26,9 @@ inside where you cloned this repository.
 - matplotlib (visualization)
 - tensorflow-gpu (keras backend; you can also use regular tensorflow)
 - pandas (easy data inspection)
+- tqdm (progress bar)
+- PIL (image library)
+- h5py (HDF5 binary data format)
 
 #### Virtual environment
 Ideally you work in a Python virtual environment. If you don't know how to set
@@ -43,7 +46,7 @@ Activate virtual environment:
 Once activated, anything you install using `pip` is installed in the virtual
 environment separately from your system Python:
 
-    $ pip install keras sklearn matplotlib tensorflow-gpu pandas
+    $ pip install keras sklearn matplotlib tensorflow-gpu pandas tqdm pillow h5py
 
 ### Code formatting
 Code should be formatted according to
