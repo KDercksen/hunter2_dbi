@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from constants import DATA_DIR
+from constants import DATA_DIR, NUM_CLASSES
 from keras.preprocessing.image import img_to_array, load_img
 from pandas import read_csv
+import numpy as np
 import os
 import os.path as osp
 
@@ -56,7 +57,46 @@ def get_images(train_or_test, size):
     size: int
         Size of image (size x size), for example 224 for VGG16 network or 299
         for XCeption network.
+
+    Yields:
+    -------
+        img_array: numpy array
+            Image loaded as NumPy array.
     '''
     for img in os.listdir(osp.join(DATA_DIR, train_or_test)):
         img_id = osp.splitext(osp.basename(img))[0]
         yield read_img(img_id, train_or_test, size)
+
+
+def basic_images_generator(train_or_test, labels, batch_size, size):
+    '''Generator for use with Keras' model.fit_generator.
+
+    TODO: Make this use pivoted labels somehow?
+
+    Arguments:
+    ----------
+    train_or_test: string
+        'train' or 'test'.
+    labels: pandas dataframe
+        A pandas dataframe with columns 'id' and 'breed'. For this you can use
+        the output (or some subset) of util.get_labels.
+    batch_size: int
+        Number of samples and labels to return for each batch.
+    size:
+        Size of image (size x size), for example 224 for VGG16 network or 299
+        for XCeption network.
+
+    Yields:
+    -------
+    batch_samples, batch_labels: tuple of np.array
+        A tuple of samples and corresponding labels.
+    '''
+    batch_samples = np.zeros((batch_size, size, size, 3))
+    batch_labels = np.zeros((batch_size, 1))
+
+    while True:
+        for i in range(batch_size):
+            idx = np.random.choice(len(labels), 1)
+            batch_samples[i] = read_img(labels[idx]['id'], train_or_test, size)
+            batch_labels[i] = labels[idx]['breed']
+        yield batch_samples, batch_labels
