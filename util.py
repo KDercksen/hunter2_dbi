@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from constants import DATA_DIR, NUM_CLASSES
+from constants import DATA_DIR
 from keras.preprocessing.image import img_to_array, load_img
 from pandas import read_csv
 import numpy as np
@@ -97,6 +97,7 @@ def basic_images_generator(train_or_test, labels, batch_size, size):
     while True:
         for i in range(batch_size):
             idx = np.random.choice(len(labels), 1)
-            batch_samples[i] = read_img(labels[idx]['id'], train_or_test, size)
-            batch_labels[i] = labels[idx]['breed']
+            batch_samples[i] = read_img(labels.iloc[idx]['id'], train_or_test,
+                                        size)
+            batch_labels[i] = labels.iloc[idx]['breed']
         yield batch_samples, batch_labels
