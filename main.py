@@ -11,6 +11,7 @@ from util import get_labels, get_images
 import numpy as np
 
 '''Define constants'''
+fname = 'model1.h5'
 np.random.seed(seed=SEED)
 INPUT_SIZE = 299
 
@@ -25,15 +26,15 @@ labels_pivot = labels.pivot('id', 'breed', 'target').reset_index().fillna(0) \
 '''Load training data'''
 print('Load training data...')
 images = np.zeros((len(labels), INPUT_SIZE, INPUT_SIZE, 3), dtype='float16')
-for i, img in tqdm(enumerate(get_images('train', INPUT_SIZE))):
+for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE))):
     x = inception_v3.preprocess_input(np.expand_dims(img.copy(), axis=0))
     images[i] = x
 
 '''Split into training (~80%) and validation set (~20%)'''
 print('Create train/val split...')
 rnd = np.random.random(len(labels))
-train_idx = rnd < 0.8
-valid_idx = rnd >= 0.8
+train_idx = rnd < 0.9
+valid_idx = rnd >= 0.9
 
 y_train = labels_pivot.values[train_idx]
 y_valid = labels_pivot.values[valid_idx]
@@ -60,18 +61,14 @@ model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 '''Fit model on data'''
-model.fit(x_train, y_train, batch_size=32, epochs=20, verbose=1)
+model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=32, epochs=20, verbose=1)
 
 '''Save model'''
-fname = 'model1.h5'
 print(f'Saving model to {fname}')
 model.save(fname)
 
-'''Predict validation set'''
-print('Predict val set...')
-pred_valid = model.predict(x_valid, batch_size=32, verbose=1)
-
 '''Evaluate predictions'''
-print(f'Validation log loss {log_loss(y_valid, pred_valid)}')
-
-# TODO: accuracy on validation set
+print('Evaluate model...')
+loss, accuracy = model.evaluate(x_valid, batch_size=32, verbose=1)
+print(f'Loss: {loss}')
+print(f'Accuracy: {accuracy}')

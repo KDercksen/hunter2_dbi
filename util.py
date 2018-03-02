@@ -65,7 +65,7 @@ def get_images(train_or_test, size):
     '''
     for img in os.listdir(osp.join(DATA_DIR, train_or_test)):
         img_id = osp.splitext(osp.basename(img))[0]
-        yield read_img(img_id, train_or_test, size)
+        yield read_img(img_id, train_or_test, size), img_id
 
 
 def basic_images_generator(train_or_test, labels, batch_size, size):
