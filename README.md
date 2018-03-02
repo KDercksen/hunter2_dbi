@@ -29,6 +29,7 @@ inside where you cloned this repository.
 - tqdm (progress bar)
 - PIL (image library)
 - h5py (HDF5 binary data format)
+- jupyter (optional, to work with notebooks)
 
 #### Virtual environment
 Ideally you work in a Python virtual environment. If you don't know how to set
@@ -46,7 +47,7 @@ Activate virtual environment:
 Once activated, anything you install using `pip` is installed in the virtual
 environment separately from your system Python:
 
-    $ pip install keras sklearn matplotlib tensorflow-gpu pandas tqdm pillow h5py
+    $ pip install keras sklearn matplotlib tensorflow-gpu pandas tqdm pillow h5py jupyter
 
 ### Code formatting
 Code should be formatted according to
