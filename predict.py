@@ -33,8 +33,8 @@ predictions = model.predict(images, verbose=1)
 print('Saving predictions...')
 with open('predictions.csv', 'w') as csvfile:
     fieldnames = ['id'] + [l for l in labels]
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
+    writer = csv.writer(csvfile)
+    writer.writerow(fieldnames)
     for i, prediction in enumerate(predictions):
         row = [ids[i]] + ['%.10f' % x for x in prediction]
         writer.writerow(row)
