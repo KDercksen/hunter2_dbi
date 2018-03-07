@@ -4,7 +4,7 @@
 from constants import NUM_CLASSES, SEED
 from keras.applications import inception_v3
 from keras.callbacks import ModelCheckpoint, TensorBoard
-from keras.layers import Dense, GlobalAveragePooling2D
+from keras.layers import Dense, Dropout, GlobalAveragePooling2D
 from keras.models import Model
 from time import time
 from tqdm import tqdm
@@ -55,6 +55,7 @@ base_model = inception_v3.InceptionV3(weights='imagenet', include_top=False)
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
 x = Dense(1024, activation='relu')(x)
+x = Dropout(.3)(x)
 y = Dense(NUM_CLASSES, activation='softmax')(x)
 model = Model(inputs=base_model.input, outputs=y)
 
@@ -65,7 +66,7 @@ model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Fit model on data, with callbacks to save best model and run TensorBoard
-cp = ModelCheckpoint(fname, monitor='val_acc', save_best_only=True)
+cp = ModelCheckpoint(fname, monitor='val_loss', save_best_only=True)
 tb = TensorBoard(log_dir=log_dir)
 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), verbose=1,
           epochs=n_epochs, callbacks=[cp, tb], batch_size=batch_size)
