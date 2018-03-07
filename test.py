@@ -28,8 +28,6 @@ for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE))):
 # Load model weights
 print(f'Load model from {fname}')
 model = load_model(fname)
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
-              metrics=['accuracy'])
 
 # Evaluate model on data
 print('Evaluate model...')
