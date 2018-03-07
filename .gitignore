@@ -1,4 +1,7 @@
 data/
+training_log/
+*.csv
+*.h5
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -53,3 +53,10 @@ environment separately from your system Python:
 Code should be formatted according to
 [PEP8](https://www.python.org/dev/peps/pep-0008/) guidelines. 4 spaces
 indentation etc. :)
+
+### TensorBoard
+`train.py` logs training progress to the `./training_log` directory; these logs
+can be visualized using `tensorboard` (example command from within project
+directory).
+
+    $ tensorboard --logdir=./training_log
