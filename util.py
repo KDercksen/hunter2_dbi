@@ -4,6 +4,7 @@
 from constants import DATA_DIR
 from keras.preprocessing.image import img_to_array, load_img
 from pandas import read_csv
+from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import os
 import os.path as osp
@@ -67,7 +68,18 @@ def get_images(train_or_test, size, img_ids=None):
             Image loaded as NumPy array.
     '''
     if not img_ids:
-        fnames = os.listdir(osp.join(DATA_DIR, train_or_test))
+        fnames = sorted(os.listdir(osp.join(DATA_DIR, train_or_test)))
         img_ids = [osp.splitext(osp.basename(img))[0] for img in fnames]
     for img_id in img_ids:
         yield read_img(img_id, train_or_test, size), img_id
+
+
+def one_hot(labels):
+    '''One-hot encoding for labels.
+
+    Arguments:
+    ----------
+    labels: list of labels
+        List of strings or whatever.
+    '''
+    return LabelEncoder().fit_transform(labels)
