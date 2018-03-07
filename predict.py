@@ -11,7 +11,6 @@ import numpy as np
 # Define constants
 INPUT_SIZE = 299
 fname = 'model1.h5'
-train_test = 'test'
 nr_predictions = 10357
 
 # Get ids, label names and images
@@ -19,8 +18,8 @@ print('Load data...')
 labels = get_labels().sort_values(by=['breed']).breed.unique()
 ids = []
 images = np.zeros((nr_predictions, INPUT_SIZE, INPUT_SIZE, 3), dtype='float16')
-for i, (img, img_id) in tqdm(enumerate(get_images(train_test, INPUT_SIZE))):
-    x = inception_v3.preprocess_input(np.expand_dims(img.copy(), axis=0))
+for i, (img, img_id) in tqdm(enumerate(get_images('test', INPUT_SIZE))):
+    x = inception_v3.preprocess_input(np.expand_dims(img, axis=0))
     images[i] = x
     ids.append(img_id)
 

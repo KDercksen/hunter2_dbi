@@ -4,7 +4,7 @@
 from keras.applications import inception_v3
 from keras.models import load_model
 from tqdm import tqdm
-from util import get_labels, get_images
+from util import get_labels, get_images, one_hot
 import numpy as np
 
 # Define constants
@@ -14,16 +14,16 @@ fname = 'model1.h5'
 # Load labels
 print('Load labels...')
 labels = get_labels()
-labels['target'] = 1
-labels['rank'] = labels.groupby('breed').rank()['id']
-labels_pivot = labels.pivot('id', 'breed', 'target').reset_index().fillna(0) \
-                                                    .drop(columns=['id'])
+
 # Load images
 print('Load images...')
 images = np.zeros((len(labels), INPUT_SIZE, INPUT_SIZE, 3), dtype='float16')
 for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE))):
-    x = inception_v3.preprocess_input(np.expand_dims(img.copy(), axis=0))
+    x = inception_v3.preprocess_input(np.expand_dims(img, axis=0))
     images[i] = x
+
+# Load one-hot encodings
+y_train = one_hot(labels['breed'].values)
 
 # Load model weights
 print(f'Load model from {fname}')
@@ -31,6 +31,6 @@ model = load_model(fname)
 
 # Evaluate model on data
 print('Evaluate model...')
-loss, accuracy = model.evaluate(images, labels_pivot.values)
+loss, accuracy = model.evaluate(images, y_train)
 print(f'Loss: {loss}')
 print(f'Accuracy: {accuracy}')
