@@ -20,7 +20,7 @@ fname = 'model1.h5'
 log_dir = f'./training_log/{time()}'
 np.random.seed(seed=SEED)
 INPUT_SIZE = 299
-n_epochs = 100
+n_epochs = 200
 batch_size = 32
 
 # Load labels
@@ -65,10 +65,3 @@ cp = ModelCheckpoint(fname, monitor='val_loss', save_best_only=True)
 tb = TensorBoard(log_dir=log_dir)
 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), verbose=1,
           epochs=n_epochs, callbacks=[cp, tb], batch_size=batch_size)
-
-# Evaluate predictions
-print('Evaluate model...')
-loss, accuracy = model.evaluate(x_valid, y_valid, batch_size=batch_size,
-                                verbose=1)
-print(f'Loss: {loss}')
-print(f'Accuracy: {accuracy}')
