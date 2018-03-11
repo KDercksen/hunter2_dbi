@@ -57,7 +57,7 @@ model = Model(base_model.input, predictions)
 for layer in base_model.layers:
     layer.trainable = False
 
-model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy',
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Fit model on data, with callbacks to save best model and run TensorBoard
