@@ -39,8 +39,9 @@ print('Predict...')
 predictions = model.predict(images, verbose=1)
 
 print(f'Loss: {log_loss(y_train, predictions)}')
-print(f'Accuracy: {accuracy_score(y_train, np.argmax(predictions, axis=1))}')
-conf_arr = confusion_matrix(y_train, np.argmax(predictions, axis=1))
+print(f'Accuracy: {accuracy_score(np.argmax(y_train, axis=1), np.argmax(predictions, axis=1))}')
+conf_arr = confusion_matrix(np.argmax(y_train, axis=1), np.argmax(predictions, axis=1))
+conf_arr = conf_arr / conf_arr.sum(axis=1)[:, np.newaxis]
 
 print(f'Save confusion matrix to {fconf}')
 np.savetxt(fconf, conf_arr, delimiter=",")
