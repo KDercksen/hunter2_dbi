@@ -30,6 +30,7 @@ inside where you cloned this repository.
 - PIL (image library)
 - h5py (HDF5 binary data format)
 - jupyter (optional, to work with notebooks)
+- seaborn (optional, to plot confusion matrices)
 
 #### Virtual environment
 Ideally you work in a Python virtual environment. If you don't know how to set
