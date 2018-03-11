@@ -3,6 +3,7 @@
 
 from constants import DATA_DIR
 from keras.preprocessing.image import img_to_array, load_img
+from keras.utils import to_categorical
 from pandas import read_csv
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
@@ -82,4 +83,4 @@ def one_hot(labels):
     labels: list of labels
         List of strings or whatever.
     '''
-    return LabelEncoder().fit_transform(labels)
+    return to_categorical(LabelEncoder().fit_transform(labels))

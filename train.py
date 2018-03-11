@@ -59,7 +59,7 @@ model = Model(base_model.input, predictions)
 for layer in base_model.layers:
     layer.trainable = False
 
-model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy',
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Fit model on data, with callbacks to save best model and run TensorBoard
@@ -76,7 +76,7 @@ for layer in model.layers[280:]:
     layer.trainable = True
 
 model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
-              loss='sparse_categorical_crossentropy',
+              loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), verbose=1,
