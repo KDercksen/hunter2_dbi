@@ -8,6 +8,7 @@ from keras.layers import (BatchNormalization,
                           Dense,
                           Dropout,
                           GlobalAveragePooling2D)
+from keras.optimizers import SGD
 from keras.models import Model
 from sklearn.model_selection import train_test_split
 from time import time
@@ -20,6 +21,7 @@ fname = 'model1.h5'
 log_dir = f'./training_log/{time()}'
 np.random.seed(seed=SEED)
 INPUT_SIZE = 299
+n_pre_epochs = 10
 n_epochs = 200
 batch_size = 32
 
@@ -63,5 +65,19 @@ model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy',
 # Fit model on data, with callbacks to save best model and run TensorBoard
 cp = ModelCheckpoint(fname, monitor='val_loss', save_best_only=True)
 tb = TensorBoard(log_dir=log_dir)
+model.fit(x_train, y_train, validation_data=(x_valid, y_valid), verbose=1,
+          epochs=n_pre_epochs, callbacks=[cp, tb], batch_size=batch_size)
+
+# Now we will fine-tune the top inception block
+print('Fine-tuning model')
+for layer in model.layers[:280]:
+    layer.trainable = False
+for layer in model.layers[280:]:
+    layer.trainable = True
+
+model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), verbose=1,
           epochs=n_epochs, callbacks=[cp, tb], batch_size=batch_size)

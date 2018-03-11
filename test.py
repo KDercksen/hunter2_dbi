@@ -6,10 +6,15 @@ from keras.models import load_model
 from tqdm import tqdm
 from util import get_labels, get_images, one_hot
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sn
+from sklearn.metrics import confusion_matrix, accuracy_score, log_loss
 
 # Define constants
 INPUT_SIZE = 299
 fname = 'model1.h5'
+fconf = 'conf_mat1.csv'
 
 # Load labels
 print('Load labels...')
@@ -30,7 +35,12 @@ print(f'Load model from {fname}')
 model = load_model(fname)
 
 # Evaluate model on data
-print('Evaluate model...')
-loss, accuracy = model.evaluate(images, y_train)
-print(f'Loss: {loss}')
-print(f'Accuracy: {accuracy}')
+print('Predict...')
+predictions = model.predict(images, verbose=1)
+
+print(f'Loss: {log_loss(y_train, predictions)}')
+print(f'Accuracy: {accuracy_score(y_train, np.argmax(predictions, axis=1))}')
+conf_arr = confusion_matrix(y_train, np.argmax(predictions, axis=1))
+
+print(f'Save confusion matrix to {fconf}')
+np.savetxt(fconf, conf_arr, delimiter=",")
