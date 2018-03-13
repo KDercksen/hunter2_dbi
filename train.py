@@ -22,7 +22,7 @@ fname = 'model1.h5'
 log_dir = f'./training_log/{time()}'
 np.random.seed(seed=SEED)
 INPUT_SIZE = 299
-n_pre_epochs = 1
+n_pre_epochs = 10
 n_epochs = 100
 batch_size = 32
 
