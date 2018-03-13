@@ -43,20 +43,16 @@ x_train, x_valid, y_train, y_valid = train_test_split(images, y_train,
                                                       stratify=y_train)
 
 
-#Arguments of ImageDataGenerator define types of augmentation to be performed
-#E.g: Horizontal flip, rotation, etc...
+# Arguments of ImageDataGenerator define types of augmentation to be performed
+# E.g: Horizontal flip, rotation, etc...
 datagen = ImageDataGenerator(
-    featurewise_center=True,
-    featurewise_std_normalization=True,
     rotation_range=20,
     width_shift_range=0.2,
     height_shift_range=0.2,
     horizontal_flip=True)
 
 # compute quantities required for featurewise normalization
-# (std, mean, and principal components if ZCA whitening is applied)
 datagen.fit(x_train)
-
 
 # Define model:
 #   Add a single fully connected layer on top of the conv layers of Inception
@@ -81,16 +77,8 @@ model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy',
 cp = ModelCheckpoint(fname, monitor='val_loss', save_best_only=True)
 tb = TensorBoard(log_dir=log_dir)
 
-model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size), 
+model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
                     validation_data=(x_valid, y_valid),
-                    steps_per_epoch=len(x_train) / batch_size, 
+                    steps_per_epoch=x_train.shape[0] / batch_size,
                     epochs=n_epochs, 
                     callbacks=[cp, tb])
-
-
-# Evaluate predictions
-print('Evaluate model...')
-loss, accuracy = model.evaluate(x_valid, y_valid, batch_size=batch_size,
-                                verbose=1)
-print(f'Loss: {loss}')
-print(f'Accuracy: {accuracy}')
