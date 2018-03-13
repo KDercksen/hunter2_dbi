@@ -11,10 +11,10 @@ from keras.layers import (BatchNormalization,
                           GlobalAveragePooling2D)
 from keras.models import Model
 from keras.optimizers import SGD
-from sklearn.model_selection import train_test_split
 from time import time
 from tqdm import tqdm
 from util import get_labels, get_images, one_hot
+import keras.backend as K
 import numpy as np
 
 # Define constants
@@ -22,8 +22,8 @@ fname = 'model1.h5'
 log_dir = f'./training_log/{time()}'
 np.random.seed(seed=SEED)
 INPUT_SIZE = 299
-n_pre_epochs = 20
-n_epochs = 200
+n_pre_epochs = 1
+n_epochs = 100
 batch_size = 32
 
 # Load labels
@@ -32,17 +32,11 @@ labels = get_labels()
 
 # Load training data
 print('Load training data...')
-images = np.zeros((len(labels), INPUT_SIZE, INPUT_SIZE, 3), dtype='float16')
+x_train = np.zeros((len(labels), INPUT_SIZE, INPUT_SIZE, 3), dtype=K.floatx())
 for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE))):
     x = inception_v3.preprocess_input(np.expand_dims(img, axis=0))
-    images[i] = x
-
-# Split into training (~90%) and validation set (~10%)
-print('Create train/val split...')
+    x_train[i] = x
 y_train = one_hot(labels['breed'].values)
-x_train, x_valid, y_train, y_valid = train_test_split(images, y_train,
-                                                      test_size=.1,
-                                                      stratify=y_train)
 
 # Arguments of ImageDataGenerator define types of augmentation to be performed
 # E.g: Horizontal flip, rotation, etc...
@@ -51,7 +45,8 @@ datagen = ImageDataGenerator(
     rotation_range=20,
     width_shift_range=.2,
     height_shift_range=.2,
-    horizontal_flip=True)
+    horizontal_flip=True,
+    validation_split=.1)
 
 # Define model:
 #   Add a single fully connected layer on top of the conv layers of Inception
@@ -75,8 +70,11 @@ model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
 # Fit model on data, with callbacks to save best model and run TensorBoard
 cp = ModelCheckpoint(fname, monitor='val_loss', save_best_only=True)
 tb = TensorBoard(log_dir=log_dir)
-model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
-                    validation_data=(x_valid, y_valid),
+model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size,
+                                 subset='training'),
+                    validation_data=datagen.flow(x_train, y_train,
+                                                 batch_size=batch_size,
+                                                 subset='validation'),
                     steps_per_epoch=x_train.shape[0] / batch_size,
                     epochs=n_pre_epochs,
                     callbacks=[cp, tb])
@@ -92,8 +90,11 @@ model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
-                    validation_data=(x_valid, y_valid),
+model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size,
+                                 subset='training'),
+                    validation_data=datagen.flow(x_train, y_train,
+                                                 batch_size=batch_size,
+                                                 subset='validation'),
                     steps_per_epoch=x_train.shape[0] / batch_size,
                     epochs=n_epochs,
                     callbacks=[cp, tb])
