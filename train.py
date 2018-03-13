@@ -18,7 +18,7 @@ import keras.backend as K
 import numpy as np
 
 # Define constants
-fname = 'model1.h5'
+fname = 'model1_finetune.h5'
 log_dir = f'./training_log/{time()}'
 np.random.seed(seed=SEED)
 INPUT_SIZE = 299
@@ -96,5 +96,6 @@ model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size,
                                                  batch_size=batch_size,
                                                  subset='validation'),
                     steps_per_epoch=x_train.shape[0] / batch_size,
-                    epochs=n_epochs,
+                    epochs=n_pre_epochs + n_epochs,
+                    initial_epoch=n_pre_epochs,
                     callbacks=[cp, tb])
