@@ -25,11 +25,11 @@ INPUT_SIZE = 299
 n_pre_epochs = 10
 n_epochs = 100
 batch_size = 32
-n_images = 10 #len(labels)
+n_images = None
 
 # Load labels
 print('Load labels...')
-labels = get_labels()
+labels = get_labels()[:n_images]
 
 # Load training data
 print('Load training data...')
@@ -37,7 +37,7 @@ x_train = np.zeros((n_images, INPUT_SIZE, INPUT_SIZE, 3), dtype=K.floatx())
 for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE, amount=n_images))):
     x = inception_v3.preprocess_input(np.expand_dims(img, axis=0))
     x_train[i] = x
-y_train = one_hot(labels['breed'].values)
+y_train = one_hot(labels['breed'].values, num_classes=NUM_CLASSES)
 
 # Arguments of ImageDataGenerator define types of augmentation to be performed
 # E.g: Horizontal flip, rotation, etc...
@@ -82,9 +82,9 @@ model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size,
 
 # Now we will fine-tune the top inception block
 print('Fine-tuning model')
-for layer in model.layers[:280]:
+for layer in model.layers[:249]:
     layer.trainable = False
-for layer in model.layers[280:]:
+for layer in model.layers[249:]:
     layer.trainable = True
 
 model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),

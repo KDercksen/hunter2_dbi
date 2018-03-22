@@ -80,7 +80,7 @@ def get_images(train_or_test, size, img_ids=None, amount=None):
         yield read_img(img_id, train_or_test, size), img_id
 
 
-def one_hot(labels):
+def one_hot(labels, num_classes=None):
     '''One-hot encoding for labels.
 
     Arguments:
@@ -88,4 +88,4 @@ def one_hot(labels):
     labels: list of labels
         List of strings or whatever.
     '''
-    return to_categorical(LabelEncoder().fit_transform(labels))
+    return to_categorical(LabelEncoder().fit_transform(labels), num_classes=num_classes)
