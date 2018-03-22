@@ -2,13 +2,16 @@
 # -*- coding: utf-8 -*-
 
 from constants import NUM_CLASSES, SEED
-from keras.applications import inception_v3
+from keras.applications import (inception_v3,
+                                resnet50)
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import (BatchNormalization,
                           Dense,
                           Dropout,
-                          GlobalAveragePooling2D)
+                          GlobalAveragePooling2D,
+                          Input,
+                          Concatenate)
 from keras.models import Model
 from keras.optimizers import SGD
 from time import time
@@ -25,7 +28,7 @@ INPUT_SIZE = 299
 n_pre_epochs = 10
 n_epochs = 100
 batch_size = 32
-n_images = None
+n_images = 100 #len(labels)
 
 # Load labels
 print('Load labels...')
@@ -53,16 +56,25 @@ datagen = ImageDataGenerator(
 #   Add a single fully connected layer on top of the conv layers of Inception
 #   Freeze Inception layers
 print('Define and fit model...')
-base_model = inception_v3.InceptionV3(weights='imagenet', include_top=False)
-x = base_model.output
+#input = Input(shape=(INPUT_SIZE,INPUT_SIZE,3))
+#resnet50 = resnet50.ResNet50(weights='imagenet', include_top=False, input_shape=(INPUT_SIZE,INPUT_SIZE,3), input_tensor=input)
+#r = resnet50.output
+inception_v3 = inception_v3.InceptionV3(weights='imagenet', include_top=False)
+x = inception_v3.output
+#print(K.shape(x))
+#print(K.shape(r))
 x = BatchNormalization()(x)
 x = GlobalAveragePooling2D()(x)
+#r = BatchNormalization()(r)
+#r = GlobalAveragePooling2D()(r)
+#x = Concatenate(axis=0)([x,r])
+#print(K.shape(x))
 x = Dense(1024, activation='relu')(x)
 x = Dropout(.3)(x)
 predictions = Dense(NUM_CLASSES, activation='softmax')(x)
-model = Model(base_model.input, predictions)
+model = Model(inputs=inception_v3.input, outputs=predictions)
 
-for layer in base_model.layers:
+for layer in inception_v3.layers:
     layer.trainable = False
 
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
