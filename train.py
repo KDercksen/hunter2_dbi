@@ -24,6 +24,7 @@ INPUT_SIZE = 299
 n_pre_epochs = 10
 n_epochs = 200
 batch_size = 32
+n_images = 10 #len(labels)
 
 # Load labels
 print('Load labels...')
@@ -31,8 +32,8 @@ labels = get_labels()
 
 # Load training data
 print('Load training data...')
-images = np.zeros((len(labels), INPUT_SIZE, INPUT_SIZE, 3), dtype='float16')
-for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE))):
+images = np.zeros((n_images, INPUT_SIZE, INPUT_SIZE, 3), dtype='float16')
+for i, (img, img_id) in tqdm(enumerate(get_images('train', INPUT_SIZE, amount=n_images))):
     x = inception_v3.preprocess_input(np.expand_dims(img, axis=0))
     images[i] = x
 

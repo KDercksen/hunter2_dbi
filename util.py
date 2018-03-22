@@ -49,7 +49,7 @@ def get_labels():
     return read_csv(path)
 
 
-def get_images(train_or_test, size, img_ids=None):
+def get_images(train_or_test, size, img_ids=None, amount=None):
     '''Generator that yields images from train or test set.
 
     Arguments:
@@ -62,6 +62,9 @@ def get_images(train_or_test, size, img_ids=None):
     img_ids: list of image IDs to get (optional)
         In case you only want to get certain images, supply a list of IDs to
         load. If None, load all images.
+    amount: int
+        Number of images that will be loaded. Cannot be more then amount of
+        images in test or train folder. If None, load all images.
 
     Yields:
     -------
@@ -71,7 +74,9 @@ def get_images(train_or_test, size, img_ids=None):
     if not img_ids:
         fnames = sorted(os.listdir(osp.join(DATA_DIR, train_or_test)))
         img_ids = [osp.splitext(osp.basename(img))[0] for img in fnames]
-    for img_id in img_ids:
+    if not amount:
+        amount = len(img_ids)
+    for img_id in img_ids[:amount]:
         yield read_img(img_id, train_or_test, size), img_id
 
 
