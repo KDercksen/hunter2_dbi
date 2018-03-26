@@ -3,7 +3,9 @@
 
 from constants import NUM_CLASSES, SEED
 from keras.applications import (inception_v3,
-                                resnet50)
+                                resnet50,
+                                densenet,
+                                inception_resnet_v2)
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import (BatchNormalization,
@@ -28,7 +30,7 @@ INPUT_SIZE = 299
 n_pre_epochs = 10
 n_epochs = 100
 batch_size = 32
-n_images = 100 #len(labels)
+n_images = 100 
 
 # Load labels
 print('Load labels...')
@@ -56,25 +58,34 @@ datagen = ImageDataGenerator(
 #   Add a single fully connected layer on top of the conv layers of Inception
 #   Freeze Inception layers
 print('Define and fit model...')
-#input = Input(shape=(INPUT_SIZE,INPUT_SIZE,3))
+input = Input(shape=(INPUT_SIZE,INPUT_SIZE,3))
+
+#pre-trained network options:
 #resnet50 = resnet50.ResNet50(weights='imagenet', include_top=False, input_shape=(INPUT_SIZE,INPUT_SIZE,3), input_tensor=input)
 #r = resnet50.output
-inception_v3 = inception_v3.InceptionV3(weights='imagenet', include_top=False)
+#densenet201 = densenet.DenseNet201(weights='imagenet', include_top=False, input_shape=(INPUT_SIZE,INPUT_SIZE,3), input_tensor=input)
+#r = densenet201.output
+inception_resnet = inception_resnet_v2.InceptionResNetV2(weights='imagenet', include_top=False, input_shape=(INPUT_SIZE,INPUT_SIZE,3), input_tensor=input)
+r = inception_resnet.output
+inception_v3 = inception_v3.InceptionV3(weights='imagenet', include_top=False, input_tensor=input)
 x = inception_v3.output
-#print(K.shape(x))
-#print(K.shape(r))
+print(K.shape(x))
+print(K.shape(r))
 x = BatchNormalization()(x)
 x = GlobalAveragePooling2D()(x)
-#r = BatchNormalization()(r)
-#r = GlobalAveragePooling2D()(r)
-#x = Concatenate(axis=0)([x,r])
-#print(K.shape(x))
+r = BatchNormalization()(r)
+r = GlobalAveragePooling2D()(r)
+x = Concatenate(axis=1)([x,r])
+print(K.shape(x))
 x = Dense(1024, activation='relu')(x)
 x = Dropout(.3)(x)
 predictions = Dense(NUM_CLASSES, activation='softmax')(x)
-model = Model(inputs=inception_v3.input, outputs=predictions)
+model = Model(inputs=input, outputs=predictions)
 
 for layer in inception_v3.layers:
+    layer.trainable = False
+
+for layer in inception_resnet.layers:
     layer.trainable = False
 
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
@@ -94,10 +105,12 @@ model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size,
 
 # Now we will fine-tune the top inception block
 print('Fine-tuning model')
-for layer in model.layers[:249]:
+for layer in inception_v3.layers[:249]:
     layer.trainable = False
-for layer in model.layers[249:]:
+for layer in inception_v3.layers[249:]:
     layer.trainable = True
+#no fine-tuning of the second pre-trained network (yet)
+
 
 model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
               loss='categorical_crossentropy',
