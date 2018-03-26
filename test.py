@@ -13,7 +13,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score, log_loss
 
 # Define constants
 INPUT_SIZE = 299
-fname = 'model1.h5'
+fname = 'model1_finetune.h5'
 fconf = 'conf_mat1.csv'
 
 # Load labels

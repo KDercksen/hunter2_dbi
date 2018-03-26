@@ -10,7 +10,7 @@ import numpy as np
 
 # Define constants
 INPUT_SIZE = 299
-fname = 'model1.h5'
+fname = 'model1_finetune.h5'
 nr_predictions = 10357
 
 # Get ids, label names and images
