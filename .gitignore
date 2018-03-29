@@ -1,6 +1,7 @@
 data/
 training_log/
 bottleneck_features/
+rf_models/
 *.csv
 *.h5
 # Byte-compiled / optimized / DLL files
