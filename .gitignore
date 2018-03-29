@@ -1,5 +1,6 @@
 data/
 training_log/
+bottleneck_features/
 *.csv
 *.h5
 # Byte-compiled / optimized / DLL files
