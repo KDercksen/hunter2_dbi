@@ -48,11 +48,11 @@ if __name__ == '__main__':
     labels = get_labels()
     data_size = {'train': len(labels), 'test': 10357}
 
-    model = NetworkConstr(weights='imagenet', include_top=False)
+    model = NetworkConstr(weights='imagenet', pooling='avg', include_top=False)
 
     # Load process train/test data
     for key, size in data_size.items():
-        save_fname = f'{args.network}_features_{key}.npy'
+        save_fname = f'{args.network}_avg_features_{key}.npy'
         save_path = os.path.join(args.savedir, save_fname)
         if os.path.exists(save_path):
             print(f'{save_path} already exists, skipping!')
