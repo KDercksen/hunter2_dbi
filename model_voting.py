@@ -63,5 +63,5 @@ for net in networks.keys():
     preds = None
 
     # Store to file
-    store_model = f'bag_models/{net}_rf+lr_voter_acc={acc:.4f}.pkl'
+    store_model = f'bag_models/{net}_rf+lr+if_voter_acc={acc:.4f}.pkl'
     joblib.dump(voter, store_model)
