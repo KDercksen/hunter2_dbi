@@ -18,7 +18,6 @@ np.random.seed(seed=SEED)
 n_estimators = 20
 bs_size = 1.
 f_size = 1.
-voting = 'soft'
 
 labels = get_labels()
 
