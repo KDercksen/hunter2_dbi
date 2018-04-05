@@ -20,7 +20,7 @@ labels = get_labels()
 
 for net in networks.keys():
     print(f'Loading training data for {net}...')
-    with open('bottleneck_features/{net}_features_train.npy', 'rb') as f:
+    with open('bottleneck_features/' + str(net) + '_features_train.npy', 'rb') as f:
         x_train = np.load(f)
         print(f'Features shape: {x_train.shape}')
 
