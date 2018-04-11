@@ -14,6 +14,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score, log_loss
 # Define constants
 INPUT_SIZE = 299
 fname = 'model1_finetune.h5'
+fpred = 'pred_val1.csv'
 fconf = 'conf_mat1.csv'
 
 # Load labels
@@ -37,6 +38,7 @@ model = load_model(fname)
 # Evaluate model on data
 print('Predict...')
 predictions = model.predict(images, verbose=1)
+np.savetxt(fpred, predictions, delimiter=",")
 
 print(f'Loss: {log_loss(y_train, predictions)}')
 print(f'Accuracy: {accuracy_score(np.argmax(y_train, axis=1), np.argmax(predictions, axis=1))}')
