@@ -1,6 +1,7 @@
 data/
 training_log/
 bottleneck_features/
+bottleneck_features_avg/
 rf_models/
 bag_models/
 *.csv
@@ -86,6 +87,7 @@ celerybeat-schedule
 .env
 
 # virtualenv
+Py Venv/
 venv/
 ENV/
 
