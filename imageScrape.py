@@ -54,10 +54,12 @@ def get_raw_image(url):
 
 def save_image(raw_image, image_type, save_directory):
     extension = image_type if image_type else 'jpg'
-    file_name = str(uuid.uuid4().hex) + "." + extension
+    rstr = str(uuid.uuid4().hex)
+    file_name = rstr + "." + extension
     save_path = os.path.join(save_directory, file_name)
     with open(save_path, 'wb+') as image_file:
         image_file.write(raw_image)
+    return rstr
 
 def download_images_to_dir(images, save_directory, num_images):
     for i, (url, image_type) in enumerate(images):

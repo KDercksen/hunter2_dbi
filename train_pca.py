@@ -19,9 +19,11 @@ from keras.optimizers import SGD
 from time import time
 from tqdm import tqdm
 from util import get_labels, get_images, one_hot
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, FastICA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import linear_model
+from cv2 import (Canny,
+                imread)
 #from genetic_selection import GeneticSelectionCV
 import keras.backend as K
 import numpy as np
@@ -40,6 +42,8 @@ n_images = 300
 USE_PCA = True
 USE_GENSEL = False
 USE_AUTOENC = False #TODO
+USE_ICA = True
+USE_CANNY = True
 CHANNELS = 3
 
 # Load labels
@@ -65,32 +69,32 @@ datagen = ImageDataGenerator(
     validation_split=.1)
 
 # PCA feature extraction:
-NCOMPONENTS = 50
-x_train_pca = np.zeros((n_images,NCOMPONENTS,3)) #variable containing pca features
-train_inv_pca = np.zeros((n_images,INPUT_SIZE*INPUT_SIZE,3)) #variable inverting pca features for visualization
+NCOMPONENTS_PCA = 50
+NCOMPONENTS_ICA = 50
+plot_idx = 1
+x_train_pca = np.zeros((n_images,NCOMPONENTS_PCA,3))  # variable containing pca features
+train_inv_pca = np.zeros((n_images,INPUT_SIZE*INPUT_SIZE,3))  # variable inverting pca features for visualization
+x_train_ica = np.zeros((n_images,NCOMPONENTS_ICA,3))  # variable containing ica features
+train_inv_ica = np.zeros((n_images,INPUT_SIZE*INPUT_SIZE,3))  # variable inverting ica features for visualization
+x_train_canny = np.zeros((n_images,INPUT_SIZE,INPUT_SIZE,3))  # variable containing edges detected by canny edge detector
+
 for i in range(CHANNELS):
     if USE_PCA:
-        # img = x_train[i,:,:,:]
-        # img = np.reshape(img,(INPUT_SIZE*INPUT_SIZE,3))
-        #scaler = StandardScaler()
-        pca = PCA(n_components=NCOMPONENTS)
+        pca = PCA(n_components=NCOMPONENTS_PCA)
         x_tr = np.reshape(x_train[:, :, :, i], (n_images, INPUT_SIZE*INPUT_SIZE))
-        #scaler.fit(np.reshape(x_train[:, :, :, i], (n_images, INPUT_SIZE*INPUT_SIZE)))
-        #x_train_sc = scaler.transform(np.reshape(x_train[:, :, :, i], (n_images, INPUT_SIZE*INPUT_SIZE)))
-        # print(np.shape(x_tr))
         x_train_pca[:, :, i] = pca.fit_transform(x_tr)
-        print(np.shape(x_train_pca))
-        # print(np.shape(pca.fit_transform(x_tr)))
-        # print(pca.noise_variance_)
         print(pca.explained_variance_ratio_)
         inv_pca = pca.inverse_transform(x_train_pca[:, :, i])
         train_inv_pca[:,:,i] = inv_pca
-        #inv_sc = scaler.inverse_transform(inv_pca)
-        # print(np.shape(inv_sc))
-        print(inv_pca[99,:])
-        plt.imshow(np.reshape(inv_pca[99,:],(INPUT_SIZE,INPUT_SIZE)))
-        plt.show()
-        # (pca.singular_values_)
+
+    if USE_ICA:
+        ica = FastICA(n_components=NCOMPONENTS_ICA)
+        x_tr = np.reshape(x_train[:, :, :, i], (n_images, INPUT_SIZE * INPUT_SIZE))
+        x_train_ica[:, :, i] = ica.fit_transform(x_tr)
+        print(pca.explained_variance_ratio_)
+        inv_ica = ica.inverse_transform(x_train_ica[:, :, i])
+        train_inv_ica[:, :, i] = inv_ica
+
 
     if USE_GENSEL:
         # Genetic feature selection: #very slow
@@ -98,16 +102,45 @@ for i in range(CHANNELS):
         gs = GeneticSelectionCV(clsfr)
         print(np.shape(x_tr))
         print(np.shape(y_train))
-        print(np.array(np.argmax(y_train,axis=1)))
-        gs_features = gs.fit(x_tr, np.array(np.argmax(y_train,axis=1)))
+        print(np.array(np.argmax(y_train, axis=1)))
+        gs_features = gs.fit(x_tr, np.array(np.argmax(y_train, axis=1)))
         gs_features.support_
 
-print(np.shape(train_inv_pca[99,:,:]))
-print(train_inv_pca[99,:,:])
-mms = MinMaxScaler()
-X = mms.fit_transform(train_inv_pca[99,:,:])
-plt.imshow(np.reshape(X, (INPUT_SIZE, INPUT_SIZE,3)))
-plt.show()
+# note: images of dogs are quite dark. possible clipping issue
+
+if USE_PCA:
+    # print(np.shape(train_inv_pca[plot_idx, :, :]))
+    # print(train_inv_pca[plot_idx, :, :])
+    mms = MinMaxScaler()
+    X = mms.fit_transform(train_inv_pca[plot_idx, :, :])
+    plt.subplot(121)
+    plt.imshow(x_train[plot_idx, :, :, :])
+    plt.subplot(122)
+    plt.imshow(np.reshape(X, (INPUT_SIZE, INPUT_SIZE,3)))
+    plt.show()
+
+if USE_ICA:
+    # print(np.shape(train_inv_ica[plot_idx, :, :]))
+    # print(train_inv_ica[plot_idx, :, :])
+    mms = MinMaxScaler()
+    X = mms.fit_transform(train_inv_ica[plot_idx, :, :])
+    plt.subplot(121)
+    plt.imshow(x_train[plot_idx, :, :, :])
+    plt.subplot(122)
+    plt.imshow(np.reshape(X, (INPUT_SIZE, INPUT_SIZE, 3)))
+    plt.show()
+
+if USE_CANNY:
+    for i in range(n_images):
+        for c in range(CHANNELS):
+            img = x_train[i, :, :, c].astype(np.uint8)
+            x_train_canny[i, :, :, c] = Canny(img, np.mean(img)-(np.mean(img)*0.25), np.mean(img)+(np.mean(img)*0.25))  #thresholding such that max = mean + 25% and min = mean - 25%
+
+    plt.subplot(121)
+    plt.imshow(x_train[plot_idx, :, :, :])
+    plt.subplot(122)
+    plt.imshow(x_train_canny[plot_idx, :, :, :])
+    plt.show()
 
 # Define model:
 #   Add a single fully connected layer on top of the conv layers of Inception
