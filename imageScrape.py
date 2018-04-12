@@ -78,13 +78,17 @@ def run(query, save_directory, num_images=100):
     download_images_to_dir(images, save_directory, num_images)
     logger.info("Finished")
 
-def main():
+def img_scrape(query, num_images, save_directory):
     parser = argparse.ArgumentParser(description='Scrape Google images')
     parser.add_argument('-s', '--search', default='labrador', type=str, help='search term')
     parser.add_argument('-n', '--num_images', default=10, type=int, help='num images to save')
     parser.add_argument('-d', '--directory', default='C:/Users/Stephan/Desktop/testings/Images', type=str, help='save directory')
-    args = parser.parse_args()
+    args = parser.parse_args(['-s',f'{query}','-n',f'{num_images}','-d',f'{save_directory}'])
     run(args.search, args.directory, args.num_images)
 
 if __name__ == '__main__':
-    main()
+    print('hello')
+    query = 'labrador'
+    num_images = 10
+    save_directory = 'C:/Users/Stephan/Desktop/Bad_Dogs'
+    img_scrape(query,num_images,save_directory)
