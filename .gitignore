@@ -1,6 +1,7 @@
 data/
 training_log/
 bottleneck_features/
+bottleneck_features_avg/
 rf_models/
 *.csv
 *.h5
@@ -87,6 +88,7 @@ celerybeat-schedule
 # virtualenv
 venv/
 ENV/
+Py Venv/
 
 # Spyder project settings
 .spyderproject
