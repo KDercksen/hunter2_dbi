@@ -47,6 +47,7 @@ for net in networks.keys():
 
 	print('Training GBM and running predictions on average bottleneck features using lightgbm...')
 	train_data = lgb.Dataset(x_train,label = y_train)
+	test_data = lgb.Dataset(x_val,label = y_val)
 	
 	#Setting parameters for lightgbm 
 	params = {'task': 'train',
@@ -54,19 +55,26 @@ for net in networks.keys():
 		'objective': 'multiclass',
 		'num_class':120,
 		'metric': 'multi_logloss',
-		'learning_rate': 0.002,
-		'max_depth': 10,
-		'num_leaves': 30,
-		'min_data_in_leaf':2,
-		'feature_fraction': 0.4,
+		'learning_rate': 0.006,
+		'max_depth': 15,
+		'num_leaves': 20,
+		'min_data_in_leaf':5,
+		'feature_fraction': 0.3,
 		'bagging_fraction': 0.6,
 		'bagging_freq': 17,
 		'max_bin':63,
 		'device': 'gpu'}
 	
-	num_round=100
+	num_round=500
+	valids = list(train = train_data, test = test_data)
+	
 	start=datetime.now()
-	lgbm=lgb.train(params,train_data,num_round)
+	lgbm=lgb.train(params,
+		train_data,
+		num_round,
+		valid_sets = test_data,  # eval training data,
+		verbose_eval = 10
+		)
 	stop=datetime.now()
 	
 	#Execution time of the model
