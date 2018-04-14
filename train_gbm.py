@@ -44,10 +44,11 @@ for net in networks.keys():
 
 	weight_vector = compute_class_weight('balanced', np.unique(y_train), y_train)
 	class_weight = {c: w for c, w in zip(np.unique(y_train), weight_vector)}
-
+	
+	print(class_weight)
 	print('Training GBM and running predictions on average bottleneck features using lightgbm...')
 	train_data = lgb.Dataset(x_train,label = y_train)
-	test_data = lgb.Dataset(x_val,label = y_val)
+	test_data = lgb.Dataset(x_val,label = y_val,reference = train_data)
 	
 	#Setting parameters for lightgbm 
 	params = {'task': 'train',
@@ -56,24 +57,26 @@ for net in networks.keys():
 		'num_class':120,
 		'metric': 'multi_logloss',
 		'learning_rate': 0.006,
-		'max_depth': 15,
-		'num_leaves': 20,
-		'min_data_in_leaf':5,
-		'feature_fraction': 0.3,
-		'bagging_fraction': 0.6,
-		'bagging_freq': 17,
+		'max_depth': 9,
+		'num_leaves': 3,
+		'min_data_in_leaf':2,
+		'feature_fraction': 0.45,
+		'bagging_fraction': 0.7,
+		'bagging_freq': 15,
 		'max_bin':63,
+		'lambda_l2': 0.1,
 		'device': 'gpu'}
 	
-	num_round=500
-	valids = list(train = train_data, test = test_data)
+	num_round=5000
+	valids = test_data
 	
 	start=datetime.now()
 	lgbm=lgb.train(params,
 		train_data,
 		num_round,
 		valid_sets = test_data,  # eval training data,
-		verbose_eval = 10
+		verbose_eval = 10,
+		early_stopping_rounds = 40
 		)
 	stop=datetime.now()
 	
@@ -83,7 +86,8 @@ for net in networks.keys():
 	
 	print('Done fitting')
 	preds = lgbm.predict(x_val)
-	
+	best_score = lgbm.best_score["valid_0"]["multi_logloss"]
+	print(f'Best score {best_score}')
 	predictions = []
 
 	for x in preds:
@@ -100,5 +104,5 @@ for net in networks.keys():
 	preds = None
 
 	# Store to file
-	store_model = f'rf_models/{net}_rf_{n_estimators}_acc={acc:.4f}.pkl'
-	joblib.dump(lgbm, store_model)
+	store_model = f'gbm_models/{net}_rf_{n_estimators}_acc={acc:.4f}_loss={best_score:.4f}.pkl'
+	joblib.dump(lgbm.best_iteration, store_model)
