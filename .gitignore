@@ -3,6 +3,8 @@ training_log/
 bottleneck_features/
 bottleneck_features_avg/
 rf_models/
+gbm_models/
+lda_models/
 *.csv
 *.h5
 # Byte-compiled / optimized / DLL files
