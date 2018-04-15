@@ -5,7 +5,7 @@
 from constants import SEED
 from extract_features import networks
 from sklearn.externals import joblib
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import log_loss, accuracy_score
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -26,6 +26,7 @@ np.random.seed(seed=SEED)
 n_estimators = 100
 
 labels = get_labels()
+# model = {}
 
 for net in networks.keys():
 	print(f'Loading training data for {net}...')
@@ -36,7 +37,11 @@ for net in networks.keys():
 		le = LabelEncoder()
 	le.fit(labels['breed'])
 	y_train = le.transform(labels['breed'])
-
+	
+	# model[f'{net}'] = {}
+	# model[f'{net}']['predict_proba'] = {}
+	# model[f'{net}']['val_info'] = {}
+	
 	print('Creating train/val split...')
 	x_train, x_val, y_train, y_val = train_test_split(x_train, y_train,
 													test_size=.1,
@@ -67,7 +72,7 @@ for net in networks.keys():
 		'lambda_l2': 0.1,
 		'device': 'gpu'}
 	
-	num_round=5000
+	num_round=1
 	valids = test_data
 	
 	start=datetime.now()
@@ -86,6 +91,8 @@ for net in networks.keys():
 	
 	print('Done fitting')
 	preds = lgbm.predict(x_val)
+	# model[f'{net}']['predict_proba'] = lgbm.predict(x_val)
+	# model[f'{net}']['val_info'] = y_val
 	best_score = lgbm.best_score["valid_0"]["multi_logloss"]
 	print(f'Best score {best_score}')
 	predictions = []
@@ -96,6 +103,8 @@ for net in networks.keys():
 	acc = accuracy_score(y_val, predictions)
 	print(f'{net} accuracy: {acc}')
 	
+	
+	
 	# Clear data to prevent ram issues
 	x_train = None
 	x_val = None
@@ -104,5 +113,10 @@ for net in networks.keys():
 	preds = None
 
 	# Store to file
-	store_model = f'gbm_models/{net}_rf_{n_estimators}_acc={acc:.4f}_loss={best_score:.4f}.pkl'
-	joblib.dump(lgbm.best_iteration, store_model)
+	store_model = f'gbm_models/{net}_gbm_{n_estimators}_acc={acc:.4f}_loss={best_score:.4f}.pkl'
+	joblib.dump(lgbm, store_model)
+	store_lgbm = f'gbm_models/{net}_gbm_{n_estimators}_acc={acc:.4f}_loss={best_score:.4f}.txt'
+	lgbm.save_model(store_lgbm,num_iteration = lgbm.best_iteration)
+	# store_model_data = f'gbm_models/{net}_model_data.pkl'
+	# joblib.dump(model, store_model)
+	
