@@ -30,7 +30,7 @@ labels = get_labels()
 
 for net in networks.keys():
 	print(f'Loading training data for {net}...')
-	with open(f'bottleneck_features_avg/{net}_avg_features_train.npy', 'rb') as f:
+	with open(f'bottleneck_features/{net}_avg_features_train.npy', 'rb') as f:
 		x_train = np.load(f)
 		print(f'Features shape: {x_train.shape}')
 
@@ -50,7 +50,6 @@ for net in networks.keys():
 	weight_vector = compute_class_weight('balanced', np.unique(y_train), y_train)
 	class_weight = {c: w for c, w in zip(np.unique(y_train), weight_vector)}
 	
-	print(class_weight)
 	print('Training GBM and running predictions on average bottleneck features using lightgbm...')
 	train_data = lgb.Dataset(x_train,label = y_train)
 	test_data = lgb.Dataset(x_val,label = y_val,reference = train_data)
@@ -72,7 +71,7 @@ for net in networks.keys():
 		'lambda_l2': 0.1,
 		'device': 'gpu'}
 	
-	num_round=1
+	num_round=2600
 	valids = test_data
 	
 	start=datetime.now()
@@ -103,8 +102,6 @@ for net in networks.keys():
 	acc = accuracy_score(y_val, predictions)
 	print(f'{net} accuracy: {acc}')
 	
-	
-	
 	# Clear data to prevent ram issues
 	x_train = None
 	x_val = None
@@ -119,4 +116,3 @@ for net in networks.keys():
 	lgbm.save_model(store_lgbm,num_iteration = lgbm.best_iteration)
 	# store_model_data = f'gbm_models/{net}_model_data.pkl'
 	# joblib.dump(model, store_model)
-	
