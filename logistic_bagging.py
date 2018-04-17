@@ -15,7 +15,7 @@ import numpy as np
 
 np.random.seed(seed=SEED)
 
-n_estimators = 20
+n_estimators = 50
 bs_size = 1.
 f_size = 1.
 
