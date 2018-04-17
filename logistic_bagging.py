@@ -16,12 +16,13 @@ import numpy as np
 np.random.seed(seed=SEED)
 
 n_estimators = 50
-bs_size = 1.
+bs_size = .8
 f_size = 1.
 
 labels = get_labels()
 
-for net in networks.keys():
+# for net in networks.keys():
+for net in ['inceptionresnetv2']:
     print(f'Loading training data for {net}...')
     with open(f'bottleneck_features/{net}_avg_features_train.npy', 'rb') as f:
         x_train = np.load(f)
