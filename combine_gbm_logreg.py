@@ -34,13 +34,21 @@ np.save('predictions/raw_gbm.npy', gbm_preds)
 
 # Combine predictions
 comb_preds = np.zeros(lrbag_preds.shape)
+lrcount = 0
+gbmcount = 0
 for i in range(lrbag_preds.shape[0]):
     lr_p = lrbag_preds[i].max()
     gbm_p = gbm_preds[i].max()
-    if lr_p > gbm_p:
-        comb_preds[i] = lrbag_preds[i]
-    else:
-        comb_preds[i] = gbm_preds[i]
+    comb_preds[i] = lrbag_preds[i]
+    # if lr_p > gbm_p:
+    #     comb_preds[i] = lrbag_preds[i]
+    #     lrcount += 1
+    # else:
+    #     comb_preds[i] = gbm_preds[i]
+    #     gbmcount += 1
+
+print(f'LR count: {lrcount}')
+print(f'GBM count: {gbmcount}')
 
 # Output to csv
 np.save('predictions/combined.npy', comb_preds)
