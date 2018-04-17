@@ -28,7 +28,7 @@ n_estimators = 100
 labels = get_labels()
 # model = {}
 
-for net in networks.keys():
+for net in ['inceptionresnetv2']:
 	print(f'Loading training data for {net}...')
 	with open(f'bottleneck_features/{net}_avg_features_train.npy', 'rb') as f:
 		x_train = np.load(f)
