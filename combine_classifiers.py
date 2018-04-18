@@ -30,6 +30,13 @@ for fname in os.listdir('gbm_models'):
     print(f'GBM: {gbm_file}')
     gbms.append((gbm_file, lgb.Booster(model_file=gbm_file)))
 
+# Load RF
+rfs = []
+for fname in os.listdir('rf_models'):
+    if fname.startswith('inceptionresnet'):
+        rf_file = os.path.join('rf_models', fname)
+        rfs.append((rf_file, joblib.load(rf_file)))
+
 # Run predictions, keeping best one
 counts = {i: '' for i in range(len(ids))}
 # for net in networks.keys():
@@ -37,7 +44,7 @@ for net in ['inceptionresnetv2']:
     # Load test data for this network
     test_data = np.load(f'bottleneck_features/{net}_avg_features_test.npy')
     # Load corresponding LR bag model (TODO: extend with GBM/RF?)
-    lrbag = [l for l in lrbags if net in l[0]][0][1]
+    lrbag = [l for l in rfs if net in l[0]][0][1]
     # Predictions for both models
     lrbag_preds = lrbag.predict_proba(test_data)
     # If LR bag prediction is more sure than previous prediction in array,
