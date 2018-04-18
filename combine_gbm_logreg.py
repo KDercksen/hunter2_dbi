@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from collections import Counter
+from extract_features import networks
 from sklearn.externals import joblib
 from util import get_labels
 import csv
@@ -11,44 +13,43 @@ import os
 labels = get_labels().sort_values(by=['breed']).breed.unique()
 ids = [os.path.splitext(f)[0] for f in sorted(os.listdir('data/test'))]
 
-test_data = np.load('bottleneck_features/inceptionresnetv2_avg_features_test.npy')
+# Array to store predictions
+comb_preds = np.zeros((len(ids), 120))
 
-# Load LR bag
-lrbag_file = os.listdir('bag_models')[0]
-print(f'LR bag: {lrbag_file}')
-lrbag = joblib.load(os.path.join('bag_models', lrbag_file))
+# Load LR bags
+lrbags = []
+for fname in os.listdir('bag_models'):
+    lrbag_file = os.path.join('bag_models', fname)
+    print(f'LR bag: {lrbag_file}')
+    lrbags.append((lrbag_file, joblib.load(lrbag_file)))
 
-# Load GBM
-gbm_file = os.listdir('gbm_models')[0]
-print(f'GBM: {gbm_file}')
-gbm = lgb.Booster(model_file=os.path.join('gbm_models', gbm_file))
+# Load GBMs
+gbms = []
+for fname in os.listdir('gbm_models'):
+    gbm_file = os.path.join('gbm_models', fname)
+    print(f'GBM: {gbm_file}')
+    gbms.append((gbm_file, lgb.Booster(model_file=gbm_file)))
 
-# Run predictions
-lrbag_preds = lrbag.predict_proba(test_data)
-print(lrbag_preds.shape)
-np.save('predictions/raw_lrbag.npy', lrbag_preds)
+# Run predictions, keeping best one
+counts = {i: '' for i in range(len(ids))}
+# for net in networks.keys():
+for net in ['inceptionresnetv2']:
+    # Load test data for this network
+    test_data = np.load(f'bottleneck_features/{net}_avg_features_test.npy')
+    # Load corresponding LR bag model (TODO: extend with GBM/RF?)
+    lrbag = [l for l in lrbags if net in l[0]][0][1]
+    # Predictions for both models
+    lrbag_preds = lrbag.predict_proba(test_data)
+    # If LR bag prediction is more sure than previous prediction in array,
+    # update. Else keep the old prediction.
+    for i in range(lrbag_preds.shape[0]):
+        p_lr = lrbag_preds[i]
+        p_ex = comb_preds[i]
+        if p_lr.max() > p_ex.max():
+            comb_preds[i] = p_lr
+            counts[i] = net
 
-gbm_preds = gbm.predict(test_data)
-print(gbm_preds.shape)
-np.save('predictions/raw_gbm.npy', gbm_preds)
-
-# Combine predictions
-comb_preds = np.zeros(lrbag_preds.shape)
-lrcount = 0
-gbmcount = 0
-for i in range(lrbag_preds.shape[0]):
-    lr_p = lrbag_preds[i].max()
-    gbm_p = gbm_preds[i].max()
-    # comb_preds[i] = gbm_preds[i]
-    if lr_p > gbm_p:
-        comb_preds[i] = lrbag_preds[i]
-        lrcount += 1
-    else:
-        comb_preds[i] = gbm_preds[i]
-        gbmcount += 1
-
-print(f'LR count: {lrcount}')
-print(f'GBM count: {gbmcount}')
+print(Counter(counts.values()))
 
 # Output to csv
 np.save('predictions/combined.npy', comb_preds)
