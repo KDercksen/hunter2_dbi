@@ -3,6 +3,7 @@ training_log/
 bottleneck_features/
 bottleneck_features_avg/
 rf_models/
+bag_models/
 gbm_models/
 lda_models/
 *.csv

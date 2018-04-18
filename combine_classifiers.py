@@ -17,12 +17,21 @@ if __name__ == '__main__':
     # Array to store predictions
     comb_preds = np.zeros((len(ids), 120))
 
+	#Load LDA models
+	    # Load LR bags
+    ldaModels = []
+    for fname in os.listdir('lda_models'):
+        if fname.startswith('inceptionresnet'):
+            lda_file = os.path.join('lda_models', fname)
+            ldaModels.append((lda_file, joblib.load(lda_file)))
+
+	
     # Load LR bags
-    lrbags = []
-    for fname in os.listdir('bag_models'):
-        lrbag_file = os.path.join('bag_models', fname)
-        print(f'LR bag: {lrbag_file}')
-        lrbags.append((lrbag_file, joblib.load(lrbag_file)))
+    # lrbags = []
+    # for fname in os.listdir('bag_models'):
+        # lrbag_file = os.path.join('bag_models', fname)
+        # print(f'LR bag: {lrbag_file}')
+        # lrbags.append((lrbag_file, joblib.load(lrbag_file)))
 
     # Load GBMs
     # gbms = []
@@ -43,11 +52,11 @@ if __name__ == '__main__':
     # for net in networks.keys():
     for net in ['inceptionresnetv2']:
         # Load test data for this network
-        test_data = np.load(f'bottleneck_features/{net}_avg_features_test.npy')
+        test_data = np.load(f'bottleneck_features_avg/{net}_avg_features_test.npy')
         # Load corresponding LR bag model (TODO: extend with GBM/RF?)
-        lrbag = [l for l in lrbags if net in l[0]][0][1]
+        ldaModel = [l for l in ldaModels if net in l[0]][0][1]
         # Predictions for both models
-        lrbag_preds = lrbag.predict_proba(test_data)
+        lrbag_preds = ldaModel.predict_proba(test_data)
         # If LR bag prediction is more sure than previous prediction in array,
         # update. Else keep the old prediction.
         for i in range(lrbag_preds.shape[0]):
